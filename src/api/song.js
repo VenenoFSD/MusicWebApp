@@ -2,7 +2,7 @@ import {commonParams} from "./config";
 import axios from 'axios'
 
 export function getLyric(songmid) {  //  歌词
-    const url = '/api/getLyric';
+    const url = commonParams.prefix + '/getLyric';
     const data = Object.assign({}, commonParams, {
         hostUin: 0,
         format: 'json',
@@ -19,7 +19,7 @@ export function getLyric(songmid) {  //  歌词
 }
 
 export function getSongVkey(songmid, strMediaMid) {  //  歌曲vkey
-    const url = '/api/getVkey';
+    const url = commonParams.prefix + '/getVkey';
     const data = Object.assign({}, commonParams, {
         hostUin: 0,
         format: 'json',

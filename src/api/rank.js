@@ -3,7 +3,7 @@ import axios from 'axios'
 import jsonp from "../common/js/jsonp";
 
 export function getTopList() {  //  排行榜
-    const url = '/api/getTopList';
+    const url = commonParams.prefix + '/getTopList';
     const data = Object.assign({}, commonParams, {
         platform: 'h5',
         needNewCode: 1,

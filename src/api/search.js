@@ -13,7 +13,7 @@ export function getHotKey() {  //  热门搜索
 }
 
 export function search(query, page, zhida, perpage) {  //  搜索
-    const url = '/api/search';
+    const url = commonParams.prefix + '/search';
     const data = Object.assign({}, commonParams, {
         w: query,
         p: page,

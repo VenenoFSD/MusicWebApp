@@ -13,7 +13,7 @@ export function getRecommend() {  //  轮播图
 }
 
 export function getDiscList() {  //  推荐歌单
-    const url = '/api/getDiscList';
+    const url = commonParams.prefix + '/getDiscList';
     const data = Object.assign({}, commonParams, {
         picmid: 1,
         platform: 'yqq',
@@ -34,7 +34,7 @@ export function getDiscList() {  //  推荐歌单
 }
 
 export function getDiscSongList(dissid) {  //  推荐歌单歌曲列表
-    const url = '/api/getDiscSongList';
+    const url = commonParams.prefix + '/getDiscSongList';
     const data = Object.assign({}, commonParams, {
         type: 1,
         json: 1,
