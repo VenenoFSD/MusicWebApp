@@ -165,15 +165,16 @@
                 font-size: $font-size-large-x
                 color: $color-theme
         .title
-            width: 75%
+            width: 80%
             position: absolute
             z-index: 2
             line-height: 40px
             font-size: $font-size-large
             color: $color-text
-            left: 50%
-            transform: translateX(-50%)
+            left: 10%
             no-wrap()
+            text-align: center
+            padding: 4px 0
         .bg-image
             position: relative
             width: 100%
