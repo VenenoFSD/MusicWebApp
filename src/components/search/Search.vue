@@ -39,8 +39,7 @@
     import SearchList from '../../base/search-list/SearchList'
     import Confirm from '../../base/confirm/Confirm'
     import {playlistMixin, searchMixin} from "../../common/js/mixin";
-    import {getHotKey} from "../../api/search";
-    import {ERR_OK} from "../../api/config";
+    import get from '../../common/js/get'
     import {mapActions} from 'vuex'
 
     export default {
@@ -76,19 +75,18 @@
                 this.$refs.searchResult.style.bottom = bottom;
                 this.$refs.suggest.refresh();
             },
-            _getHotKey () {
-                getHotKey().then((res) => {
-                    if (res.code === ERR_OK) {
-                        this.hotKey = res.data.hotkey.slice(0, 10);
-                    }
-                })
+            async getHotKey () {
+                let {data: {data}, status} = await get('/search/hot');
+                if (status === 200) {
+                    this.hotKey = data.hotkey.slice(0, 10);
+                }
             },
             ...mapActions([
                 'clearSearchHistory'
             ])
         },
         created () {
-            this._getHotKey();
+            this.getHotKey();
         },
         watch: {
             query (newQuery) {

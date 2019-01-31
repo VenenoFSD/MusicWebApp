@@ -22,9 +22,8 @@
 <script>
     import Loading from '../../base/loading/Loading'
     import Scroll from '../../base/scroll/Scroll'
-    import {getTopList} from "../../api/rank";
-    import {ERR_OK} from "../../api/config";
     import {playlistMixin} from "../../common/js/mixin";
+    import get from "../../common/js/get"
     import {mapMutations} from 'vuex'
 
     export default {
@@ -36,15 +35,14 @@
             }
         },
         created () {
-            this._getTopList();
+            this.getTopList();
         },
         methods: {
-            _getTopList () {
-                getTopList().then((res) => {
-                    if (res.code === ERR_OK) {
-                        this.topList = res.data.topList;
-                    }
-                });
+            async getTopList () {
+                let {data: {data}, status} = await get('/rank/top');
+                if (status === 200) {
+                    this.topList = data.topList;
+                }
             },
             handlePlaylist (playlist) {
                 const bottom = playlist.length > 0 ? '60px' : '';

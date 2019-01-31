@@ -7,10 +7,8 @@
 <script>
     import MusicList from '../music-list/MusicList'
     import {mapGetters} from 'vuex'
-    import {getDiscSongList} from "../../api/recommend";
-    import {ERR_OK} from "../../api/config";
-    import {createSong} from "../../common/js/song";
-    import {getSongVkey} from "../../api/song";
+    import get from '../../common/js/get'
+    import {createSong} from "../../common/js/song"
 
     export default {
         name: "Disc",
@@ -31,30 +29,28 @@
             }
         },
         created () {
-            this._getDiscSongList();
+            this.getDiscSongList();
         },
         methods: {
-            _getDiscSongList () {
+            async getDiscSongList () {
                 if (!this.disc.dissid) {
                     this.$router.push('/recommend');
                     return;
                 }
-                getDiscSongList(this.disc.dissid).then((res) => {
-                    if (res.code === ERR_OK) {
-                        this.songs = this._normalizeSong(res.cdlist[0].songlist);
-                    }
-                });
+                let {data, status} = await get(`/recommend/songList?dissid=${this.disc.dissid}`);
+                if (status === 200) {
+                    this.songs = this._normalizeSong(data.cdlist[0].songlist);
+                }
             },
             _normalizeSong (list) {
                 let ret = [];
-                list.forEach((item) => {
+                list.forEach(async item => {
                     if (item.songid && item.albummid) {
-                        getSongVkey(item.songmid, item.strMediaMid).then((res) => {
-                            if (res.code === ERR_OK) {
-                                let vkey = res.data.items[0].vkey;
-                                ret.push(createSong(item, vkey));
-                            }
-                        });
+                        let {data: {data}, status} = await get(`/song/vkey?songmid=${item.songmid}&strMediaMid=${item.strMediaMid}`);
+                        if (status === 200) {
+                            const vkey = data.items[0].vkey;
+                            ret.push(createSong(item, vkey));
+                        }
                     }
                 });
                 return ret;

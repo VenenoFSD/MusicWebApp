@@ -7,10 +7,8 @@
 <script>
     import MusicList from '../music-list/MusicList'
     import {mapGetters} from 'vuex'
-    import {ERR_OK} from "../../api/config";
-    import {getTopListSongs} from "../../api/rank";
-    import {createSong} from "../../common/js/song";
-    import {getSongVkey} from "../../api/song";
+    import get from "../../common/js/get"
+    import {createSong} from "../../common/js/song"
 
     export default {
         name: "TopList",
@@ -21,35 +19,33 @@
             }
         },
         methods: {
-            _getTopListSongs () {
+            async getTopListSongs () {
                 if (!this.topList.id) {
                     this.$router.push('/rank');
                     return;
                 }
-                getTopListSongs(this.topList.id).then((res) => {
-                    if (res.code === ERR_OK) {
-                        this.songs = this._normalizeSongs(res.songlist);
-                    }
-                });
+                let {data, status} = await get(`/rank/list?topid=${this.topList.id}`);
+                if (status === 200) {
+                    this.songs = this._normalizeSongs(data.songlist);
+                }
             },
             _normalizeSongs (list) {
                 let ret = [];
-                list.forEach((item) => {
+                list.forEach(async item => {
                     let musicData = item.data;
                     if (musicData.songid && musicData.albumid) {
-                        getSongVkey(musicData.songmid, musicData.strMediaMid).then((res) => {
-                            if (res.code === ERR_OK) {
-                                let vkey = res.data.items[0].vkey;
-                                ret.push(createSong(musicData, vkey));
-                            }
-                        });
+                        let {data: {data}, status} = await get(`/song/vkey?songmid=${musicData.songmid}&strMediaMid=${musicData.strMediaMid}`);
+                        if (status === 200) {
+                            const vkey =  data.items[0].vkey;
+                            ret.push(createSong(musicData, vkey));
+                        }
                     }
                 });
                 return ret;
             }
         },
         created () {
-            this._getTopListSongs();
+            this.getTopListSongs();
         },
         computed: {
             ...mapGetters([

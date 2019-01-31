@@ -165,6 +165,7 @@
                 font-size: $font-size-large-x
                 color: $color-theme
         .title
+            width: 75%
             position: absolute
             z-index: 2
             line-height: 40px

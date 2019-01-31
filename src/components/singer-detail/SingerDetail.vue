@@ -6,9 +6,7 @@
 
 <script>
     import {mapGetters} from 'vuex'
-    import {getSingerDetail} from "../../api/singer";
-    import {getSongVkey} from "../../api/song";
-    import {ERR_OK} from "../../api/config";
+    import get from '../../common/js/get'
     import {createSong} from "../../common/js/song";
     import MusicList from '../music-list/MusicList'
 
@@ -31,31 +29,29 @@
             }
         },
         created () {
-            this._getSingerDetail();
+            this.getSingerDetail();
         },
         methods: {
-            _getSingerDetail () {
+            async getSingerDetail () {
                 if (!this.singer.id) {
                     this.$router.push('/singer');
                     return;
                 }
-                getSingerDetail(this.singer.id).then((res) => {
-                    if (res.code === ERR_OK) {
-                        this.songs = this._normalizeSongs(res.data.list);
-                    }
-                });
+                let {data: {data}, status} = await get(`/singer/detail?singerId=${this.singer.id}`);
+                if (status === 200) {
+                    this.songs = this._normalizeSongs(data.list);
+                }
             },
             _normalizeSongs (list) {
                 let ret = [];
-                list.forEach((item) => {
+                list.forEach(async item => {
                     let {musicData} = item;
                     if (musicData.songid && musicData.albummid) {
-                        getSongVkey(musicData.songmid, musicData.strMediaMid).then((res) => {
-                            if (res.code === ERR_OK) {
-                                let vkey = res.data.items[0].vkey;
-                                ret.push(createSong(musicData, vkey));
-                            }
-                        });
+                        let {data: {data}, status} = await get(`/song/vkey?songmid=${musicData.songmid}&strMediaMid=${musicData.strMediaMid}`);
+                        if (status === 200) {
+                            const vkey = data.items[0].vkey;
+                            ret.push(createSong(musicData, vkey));
+                        }
                     }
                 });
                 return ret;

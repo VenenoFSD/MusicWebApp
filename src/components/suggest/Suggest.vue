@@ -24,12 +24,10 @@
     import Scroll from '../../base/scroll/Scroll'
     import Loading from '../../base/loading/Loading'
     import NoResult from '../../base/no-result/NoResult'
-    import {search} from "../../api/search";
-    import {ERR_OK} from "../../api/config";
-    import {createSong} from "../../common/js/song";
+    import {createSong} from "../../common/js/song"
     import Singer from '../../common/js/singer'
     import {mapMutations, mapActions} from 'vuex'
-    import {getSongVkey} from "../../api/song";
+    import get from '../../common/js/get'
 
     const TYPE_SINGER = 'singer';
     const perPage = 16;
@@ -63,16 +61,15 @@
             ...mapActions([
                 'insertSong'
             ]),
-            search () {  //  第一次搜索
+            async search () {  //  第一次搜索
                 this.page = 1;
                 this.hasMore = true;
                 this.$refs.suggest.scrollTo(0, 0);
-                search(this.query, this.page, this.showSinger, perPage).then((res) => {
-                    if (res.code === ERR_OK) {
-                        this.result = this._genResult(res.data);
-                        this._checkMore(res.data);
-                    }
-                });
+                let {data: {data}, status} = await get(`/search?query=${this.query}&page=${this.page}&zhida=${this.showSinger}&perpage=${perPage}`);
+                if (status === 200) {
+                    this.result = this._genResult(data);
+                    this._checkMore(data);
+                }
             },
             getIconCls (item) {
                 if (item.type === TYPE_SINGER) {
@@ -88,17 +85,16 @@
                     return `${item.name} - ${item.singer}`;
                 }
             },
-            searchMore () {  //  加载更多
+            async searchMore () {  //  加载更多
                 if (!this.hasMore) {
                     return;
                 }
                 this.page++;
-                search(this.query, this.page, this.showSinger, perPage).then((res) => {
-                    if (res.code === ERR_OK) {
-                        this.result = this.result.concat(this._genResult(res.data));
-                        this._checkMore(res.data);
-                    }
-                });
+                let {data: {data}, status} = await get(`/search?query=${this.query}&page=${this.page}&zhida=${this.showSinger}&perpage=${perPage}`);
+                if (status === 200) {
+                    this.result = this.result.concat(this._genResult(data));
+                    this._checkMore(data);
+                }
             },
             selectItem (item) {
                 if (item.type === TYPE_SINGER) {  //  进入歌手页
@@ -144,18 +140,17 @@
                 });
                 return ret;
             },
-            _insertSongsVkey () {
+            async _insertSongsVkey () {
                 for (let i = 0; i < this.result.length; i++) {
                     let item = this.result[i];
                     if (item.type === TYPE_SINGER) {
                         continue;
                     }
-                    getSongVkey(item.mid, item.mid).then((res) => {
-                        if (res.code === ERR_OK) {
-                            let vkey = res.data.items[0].vkey;
-                            item.url = `http://isure.stream.qqmusic.qq.com/C400${item.mid}.m4a?guid=5448538077&vkey=${vkey}&uin=0&fromtag=66`;
-                        }
-                    });
+                    let {data: {data}, status} = await get(`/song/vkey?songmid=${item.mid}&strMediaMid=${item.mid}`);
+                    if (status === 200) {
+                        const vkey =  data.items[0].vkey;
+                        item.url = `http://isure.stream.qqmusic.qq.com/C400${item.mid}.m4a?guid=5448538077&vkey=${vkey}&uin=0&fromtag=66`;
+                    }
                 }
             }
         },

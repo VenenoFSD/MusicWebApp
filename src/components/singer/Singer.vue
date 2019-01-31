@@ -6,12 +6,11 @@
 </template>
 
 <script>
-    import {getSingerList} from '../../api/singer'
-    import {ERR_OK} from "../../api/config"
     import Singer from '../../common/js/singer'
     import ListView from '../../base/list-view/ListView'
     import {mapMutations} from 'vuex'
-    import {playlistMixin} from "../../common/js/mixin";
+    import {playlistMixin} from "../../common/js/mixin"
+    import get from '../../common/js/get'
 
     const HOT_NAME = '热门';
     const HOT_SINGER_LEN = 10;
@@ -28,18 +27,11 @@
             ListView
         },
         methods: {
-            _getSingerList () {
-                getSingerList().then((res) => {
-                    /* 新版api
-                    if (res.code === ERR_OK && res.singerList.code === ERR_OK) {
-                        this.singerList = res.singerList.data.singerlist;
-                        console.log(this.singerList);
-                    }
-                    */
-                    if (res.code === ERR_OK) {  //  老版api
-                        this.singerList = this._normalizeSinger(res.data.list);
-                    }
-                });
+            async getSingerList () {
+                let {data: {data}, status} = await get('/singer/hot');
+                if (status === 200) {
+                    this.singerList = this._normalizeSinger(data.list);
+                }
             },
             _normalizeSinger (list) {
                 let map = {
@@ -96,7 +88,7 @@
             }
         },
         created () {
-            this._getSingerList();
+            this.getSingerList();
         }
     }
 </script>

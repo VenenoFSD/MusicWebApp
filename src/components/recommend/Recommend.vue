@@ -36,8 +36,7 @@
 </template>
 
 <script>
-    import {getRecommend, getDiscList} from '../../api/recommend'
-    import {ERR_OK} from "../../api/config"
+    import get from '../../common/js/get'
     import Scroll from '../../base/scroll/Scroll'
     import Loading from '../../base/loading/Loading'
     import {playlistMixin} from "../../common/js/mixin";
@@ -64,19 +63,17 @@
             Loading
         },
         methods: {
-            _getRecommend () {
-                getRecommend().then((res) => {
-                    if (res.code === ERR_OK) {
-                        this.recommend = res.data.slider;
-                    }
-                });
+            async getBanner () {
+                let {data: {data}, status} = await get('/recommend/banner')
+                if (status === 200) {
+                    this.recommend = data.slider;
+                }
             },
-            _getDiscList () {
-                getDiscList().then((res) => {
-                    if (res.code === ERR_OK) {
-                        this.discList = res.data.list;
-                    }
-                });
+            async getDiscList () {
+                let {data: {data}, status} = await get('/recommend/disc')
+                if (status === 200) {
+                    this.discList = data.list;
+                }
             },
             loadImage () {
                 /* better-scroll 无法滚动或滚动异常：图片和列表其中一个或两个还未渲染DOM */
@@ -106,14 +103,15 @@
             }
         },
         created () {
-            this._getRecommend();
-            this._getDiscList();
+            this.getBanner();
+            this.getDiscList();
         }
     }
 </script>
 
 <style scoped lang="stylus">
     @import '../../common/stylus/variable.styl'
+    @import '../../common/stylus/mixin.styl'
     .recommend
         width: 100%
         top: 88px
@@ -160,6 +158,7 @@
                         .name
                             margin-bottom: 8px
                             color: $color-text
+                            no-wrap()
                         .author
                             color: $color-text-d
             .loading-container
