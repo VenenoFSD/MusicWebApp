@@ -18,7 +18,7 @@ export default class Song {
             return Promise.resolve(this.lyric);
         }
         return new Promise(async (resolve, reject) => {
-            let {retcode, lyric} = await get(`/song/lyric?songmid=${this.mid}`);
+            let {data: {retcode, lyric}} = await get(`/song/lyric?songmid=${this.mid}`);
             if (retcode === 0) {
                 this.lyric = Base64.decode(lyric);
                 resolve(this.lyric);
